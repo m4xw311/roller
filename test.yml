@@ -1,0 +1,11 @@
+---
+changeGroups:
+ - name: "Group 1"
+   target: "psql ...."
+   changes:
+    - name: "Change 1"
+      deploy: "create table abcd (x int, y int)"
+      rollback: "drop table abcd"
+    - name: "Change 2"
+      deploy: "create table xyz (x int)"
+      rollback: "drop table xyz"
