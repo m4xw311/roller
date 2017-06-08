@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import sys, getopt
 import yaml
+import hashlib
 
 def main(argv):
   rollerScript = None
@@ -32,19 +33,25 @@ def main(argv):
   if operation == "deploy":
     for changeGroup in changeGroups:
       for change in changeGroup["changes"]:
-        target=changeGroup["target"] if "target" not in change else change["target"]
-        deploy=changeGroup["deploy"] if "deploy" not in change else change["deploy"]
-        print target + "<<EOF"
-        print deploy
-        print "EOF"
+        generateChange(change, changeGroup, operation)
   elif operation == "rollback":
     for changeGroup in reversed(changeGroups):
       for change in reversed(changeGroup["changes"]):
-        target=changeGroup["target"] if "target" not in change else change["target"]
-        rollback=changeGroup["rollback"] if "rollback" not in change else change["rollback"]
-        print target + "<<EOF"
-        print change["rollback"]
-        print "EOF"
+        generateChange(change, changeGroup, operation)
+
+
+def generateChange(change, changeGroup, operation):
+  target=changeGroup["target"] if "target" not in change else change["target"]
+  deploy=changeGroup["deploy"] if "deploy" not in change else change["deploy"]
+  rollback=changeGroup["rollback"] if "rollback" not in change else change["rollback"]
+  print hashlib.sha512(deploy).hexdigest()
+  print hashlib.sha512(rollback).hexdigest()
+  print target + "<<EOF"
+  if operation == "rollback":
+    print change["rollback"]
+  elif operation == "deploy":
+    print change["deploy"]
+  print "EOF"
 
 if __name__ == "__main__":
   main(sys.argv[1:])
