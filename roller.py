@@ -2,6 +2,7 @@
 import sys, getopt
 import yaml
 import hashlib
+import os
 
 def main(argv):
   rollerScript = None
@@ -27,22 +28,34 @@ def main(argv):
     print 'roller.py -s <rollerScript> -o <operation>'
     sys.exit(1)
 
+  preRequisites()
+
   processChangeScript(rollerScript, operation)
 
-def processChangeScript(rollerScript, operation, parentChange={}, parentChangeGroup={}):
+def preRequisites():
+  if not os.path.exists("./.tmp"):
+    os.makedirs("./.tmp")
+
+def processChangeScript(rollerScript, operation, parentChange={}, parentChangeGroup={}, depth=0):
   changeScript = yaml.load(file(rollerScript,'r'))
   changeGroups=changeScript["changeGroups"]
 
   if operation == "deploy":
     for changeGroup in changeGroups:
       for change in changeGroup["changes"]:
-        processChange(change, changeGroup, operation, parentChange, parentChangeGroup)
+        processChange(change, changeGroup, operation, parentChange, parentChangeGroup, depth, rollerScript)
   elif operation == "rollback":
     for changeGroup in reversed(changeGroups):
       for change in reversed(changeGroup["changes"]):
-        processChange(change, changeGroup, operation, parentChange, parentChangeGroup)
+        processChange(change, changeGroup, operation, parentChange, parentChangeGroup, depth, rollerScript)
 
-def processChange(change, changeGroup, operation, parentChange={}, parentChangeGroup={}):
+def processChange(change, changeGroup, operation, parentChange={}, parentChangeGroup={}, depth=0, rollerScript=None):
+  if "name" in change:
+    name=change["name"]
+
+  if "name" in changeGroup:
+    groupName=changeGroup["name"]
+
   if "target" in change:
     target=change["target"]
   elif "target" in changeGroup:
@@ -80,36 +93,46 @@ def processChange(change, changeGroup, operation, parentChange={}, parentChangeG
     includeScript=change["include"]
   elif "include" in changeGroup:
     includeScript=changeGroup["include"]
-  elif "include" in parentChange:
-    includeScript=parentChange["include"]
-  elif "include" in parentChangeGroup:
-    includeScript=parentChangeGroup["include"]
+#  elif "include" in parentChange:
+#    includeScript=parentChange["include"]
+#  elif "include" in parentChangeGroup:
+#    includeScript=parentChangeGroup["include"]
   else:
     includeScript=None
 
   if includeScript != None:
-    processChangeScript(includeScript, operation, change, changeGroup)
+    processChangeScript(includeScript, operation, change, changeGroup, depth+1)
     return
 
   if deploy == None:
     if rollback == None:
       return
-    else:
-      print hashlib.sha512(rollback).hexdigest()
-  elif rollback == None :
-    print hashlib.sha512(deploy).hexdigest()
-  else:
-    print hashlib.sha512(deploy).hexdigest()
-    print hashlib.sha512(rollback).hexdigest()
+  sys.stdout.write("{")
+  sys.stdout.write("name:\"" + name + "\", ")
+  sys.stdout.write("group:\"" + groupName + "\", ")
+  sys.stdout.write("script:\"" + rollerScript + "\", ")
+  sys.stdout.write("depth:" + str(depth))
 
   if operation == "rollback" and rollback != None:
-    print target + "<<EOF"
-    print rollback
-    print "EOF"
+    changeFile=open("./.tmp/"+hashlib.sha512(rollback).hexdigest(),"w")
+    changeFile.write("#!/bin/bash\n")
+    changeFile.write(target + "<<" + hashlib.sha512(rollback).hexdigest() + "\n")
+    changeFile.write(rollback + "\n")
+    changeFile.write(hashlib.sha512(rollback).hexdigest())
+    changeFile.close()
+    os.system("chmod a+x ./.tmp/"+hashlib.sha512(rollback).hexdigest())
+    os.system("./.tmp/"+hashlib.sha512(rollback).hexdigest())
   elif operation == "deploy" and deploy !=None:
-    print target + "<<EOF"
-    print deploy
-    print "EOF"
+    changeFile=open("./.tmp/"+hashlib.sha512(rollback).hexdigest(),"w")
+    changeFile.write("#!/bin/bash\n")
+    changeFile.write(target + "<<" + hashlib.sha512(deploy).hexdigest() + "\n")
+    changeFile.write(deploy + "\n")
+    changeFile.write(hashlib.sha512(deploy).hexdigest())
+    changeFile.close()
+    os.system("chmod a+x ./.tmp/"+hashlib.sha512(rollback).hexdigest())
+    os.system("./.tmp/"+hashlib.sha512(rollback).hexdigest())
+
+  sys.stdout.write("}\n")
 
 if __name__ == "__main__":
   main(sys.argv[1:])

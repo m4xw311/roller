@@ -4,14 +4,14 @@ changeGroups:
    target: "bash"
    changes:
     - name: "Change 1"
-      deploy: "touch a"
-      rollback: "rm a"
+      deploy: "touch i"
+      rollback: "rm i"
       capture:
-       - fileCreated: "ls -lrth a | wc -l"
+       - fileCreated: "ls -lrth i | wc -l"
 
     - name: "Change 2"
-      deploy: "touch b"
-      rollback: "rm b"
+      deploy: "touch j"
+      rollback: "rm j"
       data:
        - example: "some value"
 
@@ -20,8 +20,3 @@ changeGroups:
       data:
        - hostName: "localhost"
        - fileName: "test" 
-
-    - name: "Change 4"
-      include: "nested_changeScript2.yml"
-      data:
-       - someData: "some value"
