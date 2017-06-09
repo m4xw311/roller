@@ -27,31 +27,55 @@ def main(argv):
     print 'roller.py -s <rollerScript> -o <operation>'
     sys.exit(1)
 
+  processChangeScript(rollerScript, operation)
+
+def processChangeScript(rollerScript, operation):
   changeScript = yaml.load(file(rollerScript,'r'))
   changeGroups=changeScript["changeGroups"]
 
   if operation == "deploy":
     for changeGroup in changeGroups:
       for change in changeGroup["changes"]:
-        generateChange(change, changeGroup, operation)
+        processChange(change, changeGroup, operation)
   elif operation == "rollback":
     for changeGroup in reversed(changeGroups):
       for change in reversed(changeGroup["changes"]):
-        generateChange(change, changeGroup, operation)
+        processChange(change, changeGroup, operation)
 
-
-def generateChange(change, changeGroup, operation):
-  target=changeGroup["target"] if "target" not in change else change["target"]
-  deploy=changeGroup["deploy"] if "deploy" not in change else change["deploy"]
-  rollback=changeGroup["rollback"] if "rollback" not in change else change["rollback"]
-  print hashlib.sha512(deploy).hexdigest()
-  print hashlib.sha512(rollback).hexdigest()
-  print target + "<<EOF"
-  if operation == "rollback":
+def processChange(change, changeGroup, operation):
+  if "target" in change:
+    target=change["target"]
+  elif "target" in changeGroup:
+    target=changeGroup["target"]
+  else:
+    target=None
+  if "deploy" in change:
+    deploy=change["deploy"]
+  elif "deploy" in changeGroup:
+    deploy=changeGroup["deploy"]
+  else:
+    deploy=None
+  if "rollback" in change:
+    rollback=change["rollback"]
+  elif "rollback" in changeGroup:
+    rollback=changeGroup["rollback"]
+  else:
+    rollback=None
+  if deploy == None:
+    if rollback == None:
+      return
+    else:
+      print hashlib.sha512(rollback).hexdigest()
+  else:
+    print hashlib.sha512(deploy).hexdigest()
+  if operation == "rollback" and rollback != None:
+    print target + "<<EOF"
     print change["rollback"]
-  elif operation == "deploy":
+    print "EOF"
+  elif operation == "deploy" and deploy !=None:
+    print target + "<<EOF"
     print change["deploy"]
-  print "EOF"
+    print "EOF"
 
 if __name__ == "__main__":
   main(sys.argv[1:])

@@ -4,8 +4,29 @@ changeGroups:
    target: "psql ...."
    changes:
     - name: "Change 1"
-      deploy: "create table abcd (x int, y int)"
-      rollback: "drop table abcd"
+      deploy: "create table abcd (x int, y int);"
+      rollback: "drop table abcd;"
+      capture:
+       - name: "tableCreated"
+         test: "SELECT EXISTS ( SELECT 1 FROM information_schema.tables WHERE table_schema = 'schema_name' AND table_name = 'table_name' );"
+
     - name: "Change 2"
       deploy: "create table xyz (x int)"
       rollback: "drop table xyz"
+      data:
+       - name: "example"
+         value: "some value"
+
+    - name: "Change 3"
+      include: "nested_changeScript.yml"
+      data:
+       - name: "someData"
+         value: "some value"
+
+    - name: "Change 4"
+      standard_change: "Create file"
+      data:
+       - name: "hostName"
+         value: "localhost"
+       - name: "fileName"
+         value: "test" 
