@@ -24,7 +24,7 @@ changeGroups:
          value: "some value"
 
     - name: "Change 4"
-      standard_change: "Create file"
+      standardChange: "Create file"
       data:
        - name: "hostName"
          value: "localhost"

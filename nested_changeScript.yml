@@ -1,7 +1,7 @@
 ---
 changeGroups:
  - name: "Group 1"
-   target: "psql ...."
+   target: "target 2"
    changes:
     - name: "Change 1"
       deploy: "create table abcd (x int, y int);"
@@ -18,15 +18,10 @@ changeGroups:
          value: "some value"
 
     - name: "Change 3"
-      include: "nested_changeScript.yml"
-      data:
-       - name: "someData"
-         value: "some value"
-
-    - name: "Change 4"
-      standard_change: "Create file"
+      standardChange: "Create file"
       data:
        - name: "hostName"
          value: "localhost"
        - name: "fileName"
          value: "test" 
+
