@@ -7,21 +7,21 @@ changeGroups:
       deploy: "touch a"
       rollback: "rm a"
       capture:
-       - fileCreated: "ls -lrth a | wc -l"
+       fileCreated: "ls -lrth a | wc -l"
 
     - name: "Change 2"
       deploy: "touch b"
       rollback: "rm b"
       data:
-       - example: "some value"
+       example: "some value"
 
     - name: "Change 3"
       standardChange: "Create file"
       data:
-       - hostName: "localhost"
-       - fileName: "test" 
+       hostName: "localhost"
+       fileName: "test" 
 
     - name: "Change 4"
       include: "nested_changeScript2.yml"
       data:
-       - someData: "some value"
+       someData: "some value"

@@ -3,6 +3,7 @@ import sys, getopt
 import yaml
 import hashlib
 import os
+import jinja2
 
 def main(argv):
   rollerScript = None
@@ -89,14 +90,20 @@ def processChange(change, changeGroup, operation, parentChange={}, parentChangeG
   else:
     rollback=None
 
+  data={}
+  if "data" in parentChangeGroup:
+    data.update(parentChangeGroup["data"])
+  if "data" in parentChange:
+    data.update(parentChange["data"])
+  if "data" in changeGroup:
+    data.update(changeGroup["data"])
+  if "data" in change:
+    data.update(change["data"])
+
   if "include" in change:
     includeScript=change["include"]
   elif "include" in changeGroup:
     includeScript=changeGroup["include"]
-#  elif "include" in parentChange:
-#    includeScript=parentChange["include"]
-#  elif "include" in parentChangeGroup:
-#    includeScript=parentChangeGroup["include"]
   else:
     includeScript=None
 
@@ -107,6 +114,10 @@ def processChange(change, changeGroup, operation, parentChange={}, parentChangeG
   if deploy == None:
     if rollback == None:
       return
+
+  deploy=jinja2.Template(deploy).render(data)
+  rollback=jinja2.Template(rollback).render(data)
+
   sys.stdout.write("{")
   sys.stdout.write("name:\"" + name + "\", ")
   sys.stdout.write("group:\"" + groupName + "\", ")
