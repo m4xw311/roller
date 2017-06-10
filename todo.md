@@ -4,3 +4,4 @@
 3. Standard Target
 4. Standard Test
 5. Variable resolution: "data" of a change refrencing "data" and "capture" of another change. Specifying "data" in the "deploy", "rollback", etc
+6. Suspecting non-inheritance of variables beyond 2 levels
