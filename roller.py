@@ -4,8 +4,6 @@ import yaml
 import hashlib
 import os
 import jinja2
-from jinja2 import meta
-import ast
 
 def main(argv):
   rollerScript = None
