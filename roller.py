@@ -106,17 +106,24 @@ def processChange(change, changeGroup, operation, parentChange={}, parentChangeG
   else:
     includeScript=None
 
+# Nested changeScripts : including changeScripts in changeScripts
+# BEGIN
+#      Recursive processing of nested changeScripts 
   if includeScript != None:
     processChangeScript(includeScript, operation, change, changeGroup, depth+1, data)
     return
+# END
 
+# Do nothing if a change contains no include, deploy or rollback
+# BEGIN
   if deploy == None:
     if rollback == None:
       return
+# END
 
 # For situations where the value of a variable would contain a jinja2 reference to another variable
-#      Rendering jinja2 repeatedly until no change on further rendering
 # BEGIN
+#      Rendering jinja2 repeatedly until no change observed on further rendering
   deploy=jinja2.Template(deploy).render(data)
   prev=""
   while prev!=deploy:
@@ -130,12 +137,18 @@ def processChange(change, changeGroup, operation, parentChange={}, parentChangeG
     rollback=jinja2.Template(rollback).render(data)
 # END
 
+# For providing execution log
+# BEGIN
+#      Displaying key information about each change being executed in json format
   sys.stdout.write("{")
   sys.stdout.write("name:\"" + name + "\", ")
   sys.stdout.write("group:\"" + groupName + "\", ")
   sys.stdout.write("script:\"" + rollerScript + "\", ")
-  sys.stdout.write("depth:" + str(depth))
+  sys.stdout.write("depth:" + str(depth) + "," )
+  sys.stdout.write("operation:" + operation)
 
+#       BEGIN
+#            Generating the execution script for the change, granting execute on it and executing it
   if operation == "rollback" and rollback != None:
     changeFile=open("./.tmp/"+hashlib.sha512(rollback).hexdigest(),"w")
     changeFile.write("#!/bin/bash\n")
@@ -154,8 +167,10 @@ def processChange(change, changeGroup, operation, parentChange={}, parentChangeG
     changeFile.close()
     os.system("chmod a+x ./.tmp/"+hashlib.sha512(rollback).hexdigest())
     os.system("./.tmp/"+hashlib.sha512(rollback).hexdigest())
-
+#       END
+#       Closing the json
   sys.stdout.write("}\n")
+# END
 
 if __name__ == "__main__":
   main(sys.argv[1:])
