@@ -24,4 +24,4 @@ changeGroups:
     - name: "Change 4"
       include: "nested_changeScript2.yml"
       data:
-       someData: "some value"
+       someData2: "{{ someData }}"

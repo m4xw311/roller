@@ -18,13 +18,13 @@ changeGroups:
     - name: "Change 3"
       include: "nested_changeScript.yml"
       data:
-       someData: "some value"
+       someData: "some_file0"
 
     - name: "Change 4"
       deploy: "touch {{ fileName }}"
       rollback: "rm {{ fileName }}" 
       data:
-       fileName: "test"
+       fileName: "test2"
 
     - name: "Change 5"
       deploy: "touch z"

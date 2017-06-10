@@ -4,6 +4,8 @@ import yaml
 import hashlib
 import os
 import jinja2
+from jinja2 import meta
+import ast
 
 def main(argv):
   rollerScript = None
@@ -37,20 +39,20 @@ def preRequisites():
   if not os.path.exists("./.tmp"):
     os.makedirs("./.tmp")
 
-def processChangeScript(rollerScript, operation, parentChange={}, parentChangeGroup={}, depth=0):
+def processChangeScript(rollerScript, operation, parentChange={}, parentChangeGroup={}, depth=0, data={}):
   changeScript = yaml.load(file(rollerScript,'r'))
   changeGroups=changeScript["changeGroups"]
 
   if operation == "deploy":
     for changeGroup in changeGroups:
       for change in changeGroup["changes"]:
-        processChange(change, changeGroup, operation, parentChange, parentChangeGroup, depth, rollerScript)
+        processChange(change, changeGroup, operation, parentChange, parentChangeGroup, depth, rollerScript, data)
   elif operation == "rollback":
     for changeGroup in reversed(changeGroups):
       for change in reversed(changeGroup["changes"]):
-        processChange(change, changeGroup, operation, parentChange, parentChangeGroup, depth, rollerScript)
+        processChange(change, changeGroup, operation, parentChange, parentChangeGroup, depth, rollerScript, data)
 
-def processChange(change, changeGroup, operation, parentChange={}, parentChangeGroup={}, depth=0, rollerScript=None):
+def processChange(change, changeGroup, operation, parentChange={}, parentChangeGroup={}, depth=0, rollerScript=None, data={}):
   if "name" in change:
     name=change["name"]
 
@@ -90,7 +92,6 @@ def processChange(change, changeGroup, operation, parentChange={}, parentChangeG
   else:
     rollback=None
 
-  data={}
   if "data" in parentChangeGroup:
     data.update(parentChangeGroup["data"])
   if "data" in parentChange:
@@ -108,15 +109,28 @@ def processChange(change, changeGroup, operation, parentChange={}, parentChangeG
     includeScript=None
 
   if includeScript != None:
-    processChangeScript(includeScript, operation, change, changeGroup, depth+1)
+    processChangeScript(includeScript, operation, change, changeGroup, depth+1, data)
     return
 
   if deploy == None:
     if rollback == None:
       return
 
+# For situations where the value of a variable would contain a jinja2 reference to another variable
+#      Rendering jinja2 repeatedly until no change on further rendering
+# BEGIN
   deploy=jinja2.Template(deploy).render(data)
+  prev=""
+  while prev!=deploy:
+    prev=deploy
+    deploy=jinja2.Template(deploy).render(data)
+    
   rollback=jinja2.Template(rollback).render(data)
+  prev=""
+  while prev!=rollback:
+    prev=rollback
+    rollback=jinja2.Template(rollback).render(data)
+# END
 
   sys.stdout.write("{")
   sys.stdout.write("name:\"" + name + "\", ")

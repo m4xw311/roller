@@ -4,8 +4,8 @@ changeGroups:
    target: "bash"
    changes:
     - name: "Change 1"
-      deploy: "touch i"
-      rollback: "rm i"
+      deploy: "touch {{ someData2 }}"
+      rollback: "rm {{ someData2 }}"
       capture:
        fileCreated: "ls -lrth i | wc -l"
 
