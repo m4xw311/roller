@@ -137,18 +137,9 @@ def processChange(change, changeGroup, operation, parentChange={}, parentChangeG
     rollback=jinja2.Template(rollback).render(data)
 # END
 
-# For providing execution log
+# For executing the change
 # BEGIN
-#      Displaying key information about each change being executed in json format
-  sys.stdout.write("{")
-  sys.stdout.write("name:\"" + name + "\", ")
-  sys.stdout.write("group:\"" + groupName + "\", ")
-  sys.stdout.write("script:\"" + rollerScript + "\", ")
-  sys.stdout.write("depth:" + str(depth) + "," )
-  sys.stdout.write("operation:" + operation)
-
-#       BEGIN
-#            Generating the execution script for the change, granting execute on it and executing it
+#      Generating the execution script for the change, granting execute on it and executing it
   if operation == "rollback" and rollback != None:
     changeFile=open("./.tmp/"+hashlib.sha512(rollback).hexdigest(),"w")
     changeFile.write("#!/bin/bash\n")
@@ -167,8 +158,17 @@ def processChange(change, changeGroup, operation, parentChange={}, parentChangeG
     changeFile.close()
     os.system("chmod a+x ./.tmp/"+hashlib.sha512(rollback).hexdigest())
     os.system("./.tmp/"+hashlib.sha512(rollback).hexdigest())
-#       END
-#       Closing the json
+# END
+
+# For providing execution log
+# BEGIN
+#      Displaying key information about each change being executed in json format
+  sys.stdout.write("{")
+  sys.stdout.write("name:\"" + name + "\", ")
+  sys.stdout.write("group:\"" + groupName + "\", ")
+  sys.stdout.write("script:\"" + rollerScript + "\", ")
+  sys.stdout.write("depth:" + str(depth) + "," )
+  sys.stdout.write("operation:" + operation)
   sys.stdout.write("}\n")
 # END
 
