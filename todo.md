@@ -4,3 +4,6 @@
 3. Standard Target
 4. Standard Test
 5. Variable resolution: "data" of a change refrencing "data" and "capture" of another change. Specifying "data" in the "deploy", "rollback", etc
+6. How to implement idempotence?
+a. Using capture to decide whether to skip or to execute
+b. Using stored history to know if the execution is already done in the past

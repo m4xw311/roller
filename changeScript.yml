@@ -4,10 +4,10 @@ changeGroups:
    target: "bash"
    changes:
     - name: "Change 1"
-      deploy: "touch x"
-      rollback: "rm x"
+      deploy: "touch {{ hostName.pre.out }}"
+      rollback: "rm {{ hostName.pre.out }}"
       capture:
-       fileCreated: "ls -lrth| wc -l"
+       hostName: "hostname"
 
     - name: "Change 2"
       deploy: "touch y"
