@@ -1,0 +1,27 @@
+---
+changeGroups:
+ - name: "Group 1"
+   target: "bash"
+   changes:
+    - name: "Change 1"
+      deploy: "touch a"
+      rollback: "rm a"
+      capture:
+       fileCreated: "ls -lrth a | wc -l"
+
+    - name: "Change 2"
+      deploy: "touch b"
+      rollback: "rm b"
+      data:
+       example: "some value"
+
+    - name: "Change 3"
+      standardChange: "Create file"
+      data:
+       hostName: "localhost"
+       fileName: "test" 
+
+    - name: "Change 4"
+      include: "nested_changeScript2.yml"
+      data:
+       someData2: "{{ someData }}"

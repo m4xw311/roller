@@ -1,0 +1,22 @@
+---
+changeGroups:
+ - name: "Group 1"
+   target: "bash"
+   changes:
+    - name: "Change 1"
+      deploy: "touch {{ someData23 }}"
+      rollback: "rm {{ someData23 }}"
+      capture:
+       fileCreated: "ls -lrth i | wc -l"
+
+    - name: "Change 2"
+      deploy: "touch j"
+      rollback: "rm j"
+      data:
+       example: "some value"
+
+    - name: "Change 3"
+      standardChange: "Create file"
+      data:
+       hostName: "localhost"
+       fileName: "test" 
