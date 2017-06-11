@@ -4,6 +4,7 @@ import yaml
 import hashlib
 import os
 import jinja2
+from subprocess import Popen, PIPE
 
 def main(argv):
   rollerScript = None
@@ -90,6 +91,17 @@ def processChange(change, changeGroup, operation, parentChange={}, parentChangeG
   else:
     rollback=None
 
+  if "capture" in change:
+    capture=change["capture"]
+  elif "capture" in changeGroup:
+    capture=changeGroup["capture"]
+  elif "capture" in parentChange:
+    capture=parentChange["capture"]
+  elif "capture" in parentChangeGroup:
+    capture=parentChangeGroup["capture"]
+  else:
+    capture=None
+
   if "data" in parentChangeGroup:
     data.update(parentChangeGroup["data"])
   if "data" in parentChange:
@@ -119,6 +131,24 @@ def processChange(change, changeGroup, operation, parentChange={}, parentChangeG
   if deploy == None:
     if rollback == None:
       return
+# END
+
+# Execute capture before change
+# BEGIN
+  captureData={}
+  if capture != None:
+    for captureKey, captureValue in capture.iteritems():
+      captureFile=open("./.tmp/"+hashlib.sha512(captureValue).hexdigest(),"w")
+      captureFile.write("#!/bin/bash\n")
+      captureFile.write(target + "<<" + hashlib.sha512(captureValue).hexdigest() + "\n")
+      captureFile.write(captureValue + "\n")
+      captureFile.write(hashlib.sha512(captureValue).hexdigest())
+      captureFile.close()
+      os.system("chmod a+x ./.tmp/"+hashlib.sha512(captureValue).hexdigest())
+      process = Popen("./.tmp/"+hashlib.sha512(captureValue).hexdigest(), stdout=PIPE, stderr=PIPE)
+      captureOutput, captureError = process.communicate()
+      captureData[captureKey]={ 'pre': { 'out': captureOutput, 'err':captureError }}
+    data.update(captureData)
 # END
 
 # For situations where the value of a variable would contain a jinja2 reference to another variable
@@ -158,6 +188,24 @@ def processChange(change, changeGroup, operation, parentChange={}, parentChangeG
     changeFile.close()
     os.system("chmod a+x ./.tmp/"+hashlib.sha512(rollback).hexdigest())
     os.system("./.tmp/"+hashlib.sha512(rollback).hexdigest())
+# END
+
+# Execute capture after change
+# BEGIN
+  captureData={}
+  if capture != None:
+    for captureKey, captureValue in capture.iteritems():
+      captureFile=open("./.tmp/"+hashlib.sha512(captureValue).hexdigest(),"w")
+      captureFile.write("#!/bin/bash\n")
+      captureFile.write(target + "<<" + hashlib.sha512(captureValue).hexdigest() + "\n")
+      captureFile.write(captureValue + "\n")
+      captureFile.write(hashlib.sha512(captureValue).hexdigest())
+      captureFile.close()
+      os.system("chmod a+x ./.tmp/"+hashlib.sha512(captureValue).hexdigest())
+      process = Popen("./.tmp/"+hashlib.sha512(captureValue).hexdigest(), stdout=PIPE, stderr=PIPE)
+      captureOutput, captureError = process.communicate()
+      captureData[captureKey]={ 'post': { 'out': captureOutput, 'err':captureError }}
+    data.update(captureData)
 # END
 
 # For providing execution log
