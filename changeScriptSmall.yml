@@ -1,0 +1,19 @@
+---
+changeGroups:
+ - name: "Group 1"
+   target: "bash"
+   changes:
+    - name: "Change 1"
+      deploy: >
+        touch {{ hostName.pre.out }}
+        touch {{ hostName2.pre.out }}
+      rollback: >
+        rm {{ hostName.pre.out }}
+        rm {{ hostName2.pre.out }}
+      data:
+       someData: "x"
+      capture:
+       hostName: "hostname"
+       hostName2: "echo {{ someData }}"
+      sucessIf: "hostName.post.out == 1"
+      failedIf: "hostName.post.out != 1"
