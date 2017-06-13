@@ -205,10 +205,8 @@ def processChange(change, changeGroup, operation, parentChange={}, parentChangeG
 
 # Execute capture after change
 # BEGIN
-  captureData={}
   if capture != None:
     for captureKey, captureValue in capture.iteritems():
-      captureData={}
       captureValue=jinja2.Template(captureValue).render(data)
       captureFile=open("./.tmp/"+hashlib.sha512(captureValue).hexdigest(),"w")
       captureFile.write("#!/bin/bash\n")
@@ -220,7 +218,7 @@ def processChange(change, changeGroup, operation, parentChange={}, parentChangeG
       process = Popen("./.tmp/"+hashlib.sha512(captureValue).hexdigest(), stdout=PIPE, stderr=PIPE)
       captureOutput, captureError = process.communicate()
       captureReturnCode = process.returncode
-      captureData[captureKey]={ 'post': { 'out': captureOutput, 'err':captureError, 'ret':captureReturnCode } }
+      captureData[captureKey].update({ 'post': { 'out': captureOutput, 'err':captureError, 'ret':captureReturnCode } })
       data.update(captureData)
 # END
 
@@ -233,7 +231,7 @@ def processChange(change, changeGroup, operation, parentChange={}, parentChangeG
   sys.stdout.write("script:\"" + rollerScript + "\", ")
   sys.stdout.write("depth:" + str(depth) + "," )
   sys.stdout.write("operation:" + operation)
-  sys.stdout.write("data:" + str(data))
+#  sys.stdout.write("data:" + str(data))
   sys.stdout.write("}\n")
 # END
 
