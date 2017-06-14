@@ -4,16 +4,19 @@ changeGroups:
    target: "bash"
    changes:
     - name: "Change 1"
-      deploy: >
+      deploy: |
         touch {{ hostName.pre.out }}
-        touch {{ hostName2.pre.out }}
-      rollback: >
+        touch {{ hostName2.pre.out }}1
+      rollback: |
         rm {{ hostName.pre.out }}
-        rm {{ hostName2.pre.out }}
+        rm {{ hostName2.pre.out }}1
       data:
        someData: "x"
       capture:
-       hostName: "hostname"
-       hostName2: "echo {{ someData }}"
-      sucessIf: "hostName.post.out == 1"
-      failedIf: "hostName.post.out != 1"
+       hostName: "echo -n $(hostname)"
+       hostName2: "echo -n {{ hostName.pre.out }}"
+       fileExists: "echo -n $(ls -lrth {{ hostName.pre.out }} | wc -l)"
+      deploySuccessIf: "fileExists.post.out == '1'"
+      rollbackSuccessIf: "fileExists.post.out == '0'"
+      deploySkipIf: "fileExists.pre.out == '1'"
+      rollbackSkipIf: "fileExists.pre.out == '0'"
