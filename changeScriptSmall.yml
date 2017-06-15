@@ -1,0 +1,22 @@
+---
+changeGroups:
+ - name: "Group 1"
+   target: "bash"
+   changes:
+    - name: "Change 1"
+      deploy: |
+        touch {{ hostName.pre.out }}
+        touch {{ hostName2.pre.out }}1
+      rollback: |
+        rm {{ hostName.pre.out }}
+        rm {{ hostName2.pre.out }}1
+      data:
+       someData: "x"
+      capture:
+       hostName: "echo -n $(hostname)"
+       hostName2: "echo -n {{ hostName.pre.out }}"
+       fileExists: "echo -n $(ls -lrth {{ hostName.pre.out }} | wc -l)"
+      deploySuccessIf: "fileExists.post.out == '1'"
+      rollbackSuccessIf: "fileExists.post.out == '0'"
+      deploySkipIf: "fileExists.pre.out == '1'"
+      rollbackSkipIf: "fileExists.pre.out == '0'"

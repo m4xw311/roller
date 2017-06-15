@@ -4,10 +4,17 @@ changeGroups:
    target: "bash"
    changes:
     - name: "Change 1"
-      deploy: "touch {{ hostName.pre.out }}"
-      rollback: "rm {{ hostName.pre.out }}"
+      deploy: "mkdir {{ hostName.pre.out }} {{ hostName2.pre.out }} {{ hostName3.pre.out }}"
+      rollback: "rmdir {{ hostName.pre.out }} {{ hostName2.pre.out }} {{ hostName3.pre.out }}"
+      data:
+       someData: "x"
       capture:
-       hostName: "hostname"
+       hostName: "echo -n $(hostname)"
+       hostName2: "echo -n {{ someData }}"
+       hostName3: "echo -n {{ hostName.pre.out }}1"
+       checkSuccess: "echo -n $(ls -lrth {{ hostName.pre.out }}| wc -l)"
+      deploySucessIf: "checkSuccess.post.out == '1'"
+      rollbackSuccessIf: "checkSuccess.post.out == '0'"
 
     - name: "Change 2"
       deploy: "touch y"

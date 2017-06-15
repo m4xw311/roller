@@ -7,3 +7,5 @@
 6. How to implement idempotence?
 a. Using capture to decide whether to skip or to execute
 b. Using stored history to know if the execution is already done in the past
+7. Optimizatons:
+a. For a skipped change, assign the pre data to post rather than executing and finding post data
