@@ -198,13 +198,13 @@ def processChange(change, changeGroup, operation, parentChange={}, parentChangeG
       data.update(captureData)
 # END
   skip=0
-  result=None
-  if operation == "rollback" and rollback != None:
+  result="Success"
+  if operation == "rollback" and rollback != None and rollbackSkipIf != None:
     rollbackSkipIf=jinja2.Template("{{ " + rollbackSkipIf + " }}").render(data)
     if rollbackSkipIf=="True":
       result="Skipped"
       skip=1
-  elif operation == "deploy" and deploy !=None:
+  elif operation == "deploy" and deploy !=None and deploySkipIf != None :
     deploySkipIf=jinja2.Template("{{ " + deploySkipIf + " }}").render(data)
     if deploySkipIf=="True":
       result="Skipped"
@@ -278,13 +278,13 @@ def processChange(change, changeGroup, operation, parentChange={}, parentChangeG
       captureData[captureKey].update({ 'post': { 'out': captureOutput, 'err':captureError, 'ret':captureReturnCode } })
       data.update(captureData)
 # END
-  if operation == "rollback" and rollback != None and not skip:
+  if operation == "rollback" and rollback != None and not skip and rollbackSuccessIf != None:
     rollbackSuccessIf=jinja2.Template("{{ " + rollbackSuccessIf + " }}").render(data)
     if rollbackSuccessIf=="True":
       result="Success"
     else:
       result="Failure"
-  elif operation == "deploy" and deploy !=None and not skip:
+  elif operation == "deploy" and deploy !=None and not skip and deploySuccessIf != None:
     deploySuccessIf=jinja2.Template("{{ " + deploySuccessIf + " }}").render(data) 
     if deploySuccessIf=="True":
       result="Success"
@@ -304,6 +304,9 @@ def processChange(change, changeGroup, operation, parentChange={}, parentChangeG
   sys.stdout.write("result: \"" + result + "\"")
 #  sys.stdout.write("data:" + str(data))
   sys.stdout.write(" }\n")
+  if result == "Failure":
+    sys.exit(3)
+
 # END
 
 if __name__ == "__main__":
