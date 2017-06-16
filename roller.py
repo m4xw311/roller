@@ -8,6 +8,7 @@ from subprocess import Popen, PIPE
 import yamlordereddictloader
 import jinja2schema
 import validateChangeScript
+from termcolor import colored
 
 def main(argv):
   rollerScript = None
@@ -42,7 +43,7 @@ def main(argv):
     sys.exit(1)
 
   validateChangeScript.run(rollerScript)
-  sys.exit()
+
   preRequisites()
 
   processChangeScript(rollerScript, operation)
@@ -321,7 +322,14 @@ def processChange(change, changeGroup, operation, parentChange={}, parentChangeG
   sys.stdout.write("\"script\": \"" + rollerScript + "\", ")
   sys.stdout.write("\"depth\": " + str(depth) + ", " )
   sys.stdout.write("\"operation\": \"" + operation + "\", ")
-  sys.stdout.write("\"result\": \"" + result + "\"")
+  if result == "Success":
+    sys.stdout.write("\"result\": \"" + colored(result, 'green', attrs=['bold']) + "\"")
+  elif result == "Failure":
+    sys.stdout.write("\"result\": \"" + colored(result, 'red', attrs=['bold']) + "\"")
+  elif result == "Skipped":
+    sys.stdout.write("\"result\": \"" + colored(result, 'blue', attrs=['bold']) + "\"")
+  else:
+    sys.stdout.write("\"result\": \"" + result + "\"")
 #  sys.stdout.write("\"data\":" + str(data))
   sys.stdout.write(" }\n")
   if result == "Failure":
