@@ -6,6 +6,8 @@ import os
 import jinja2
 from subprocess import Popen, PIPE
 import yamlordereddictloader
+import jinja2schema
+import validateChangeScript
 
 def main(argv):
   rollerScript = None
@@ -39,6 +41,8 @@ def main(argv):
     print "Invalid Operation!\nUsage: roller.py -s <rollerScript> -o <operation>"
     sys.exit(1)
 
+  validateChangeScript.run(rollerScript)
+  sys.exit()
   preRequisites()
 
   processChangeScript(rollerScript, operation)
@@ -227,12 +231,20 @@ def processChange(change, changeGroup, operation, parentChange={}, parentChangeG
     while prev!=deploy:
       prev=deploy
       deploy=jinja2.Template(deploy).render(data)
+  undefinedVariables=jinja2schema.infer(deploy)
+  if not undefinedVariables:
+    print "Variables not defined:"
+    print undefinedVariables
   if operation == "rollback" and rollback != None and not skip:
     rollback=jinja2.Template(rollback).render(data)
     prev=""
     while prev!=rollback:
       prev=rollback
       rollback=jinja2.Template(rollback).render(data)
+  undefinedVariables=jinja2schema.infer(rollback)
+  if not undefinedVariables:
+    print "Variables not defined:"
+    print undefinedVariables
 # END
 
 # For executing the change
