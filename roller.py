@@ -6,6 +6,9 @@ import os
 import jinja2
 from subprocess import Popen, PIPE
 import yamlordereddictloader
+import jinja2schema
+import validateChangeScript
+from termcolor import colored
 
 def main(argv):
   rollerScript = None
@@ -13,23 +16,33 @@ def main(argv):
   try:
     opts, args = getopt.getopt(argv,"hs:o:",["rollerScript=","operation="])
   except getopt.GetoptError:
-    print 'roller.py -s <rollerScript> -o <operation>'
-    sys.exit(2)
+    print "Invalid Options!\nUsage: roller.py -s <rollerScript> -o <operation>"
+    sys.exit(1)
   for opt, arg in opts:
     if opt == '-h':
-      print 'roller.py -s <rollerScript> -o <operation>'
+      print 'Usage: roller.py -s <rollerScript> -o <operation>'
       sys.exit(0)
     elif opt in ("-s", "--rollerScript"):
       rollerScript = arg
     elif opt in ("-o", "--operation"):
       operation = arg
     else:
-      print 'roller.py -s <rollerScript> -o <operation>'
+      print "Invalid Options!\nUsage: roller.py -s <rollerScript> -o <operation>"
       sys.exit(1)
 
-  if rollerScript == None or operation == None:
-    print 'roller.py -s <rollerScript> -o <operation>'
+  if rollerScript == None:
+    print "No roller script specified!\nUsage: roller.py -s <rollerScript> -o <operation>"
     sys.exit(1)
+
+  if operation == None:
+    print "No operation specified!\nUsage: roller.py -s <rollerScript> -o <operation>"
+    sys.exit(1)
+
+  if operation not in ("deploy", "rollback"):
+    print "Invalid Operation!\nUsage: roller.py -s <rollerScript> -o <operation>"
+    sys.exit(1)
+
+  validateChangeScript.run(rollerScript)
 
   preRequisites()
 
@@ -219,12 +232,20 @@ def processChange(change, changeGroup, operation, parentChange={}, parentChangeG
     while prev!=deploy:
       prev=deploy
       deploy=jinja2.Template(deploy).render(data)
+  undefinedVariables=jinja2schema.infer(deploy)
+  if not undefinedVariables:
+    print "Variables not defined:"
+    print undefinedVariables
   if operation == "rollback" and rollback != None and not skip:
     rollback=jinja2.Template(rollback).render(data)
     prev=""
     while prev!=rollback:
       prev=rollback
       rollback=jinja2.Template(rollback).render(data)
+  undefinedVariables=jinja2schema.infer(rollback)
+  if not undefinedVariables:
+    print "Variables not defined:"
+    print undefinedVariables
 # END
 
 # For executing the change
@@ -296,13 +317,20 @@ def processChange(change, changeGroup, operation, parentChange={}, parentChangeG
 # BEGIN
 #      Displaying key information about each change being executed in json format
   sys.stdout.write("{ ")
-  sys.stdout.write("name: \"" + name + "\", ")
-  sys.stdout.write("group: \"" + groupName + "\", ")
-  sys.stdout.write("script: \"" + rollerScript + "\", ")
-  sys.stdout.write("depth: " + str(depth) + ", " )
-  sys.stdout.write("operation: \"" + operation + "\", ")
-  sys.stdout.write("result: \"" + result + "\"")
-#  sys.stdout.write("data:" + str(data))
+  sys.stdout.write("\"name\": \"" + name + "\", ")
+  sys.stdout.write("\"group\": \"" + groupName + "\", ")
+  sys.stdout.write("\"script\": \"" + rollerScript + "\", ")
+  sys.stdout.write("\"depth\": " + str(depth) + ", " )
+  sys.stdout.write("\"operation\": \"" + operation + "\", ")
+  if result == "Success":
+    sys.stdout.write("\"result\": \"" + colored(result, 'green', attrs=['bold']) + "\"")
+  elif result == "Failure":
+    sys.stdout.write("\"result\": \"" + colored(result, 'red', attrs=['bold']) + "\"")
+  elif result == "Skipped":
+    sys.stdout.write("\"result\": \"" + colored(result, 'blue', attrs=['bold']) + "\"")
+  else:
+    sys.stdout.write("\"result\": \"" + result + "\"")
+#  sys.stdout.write("\"data\":" + str(data))
   sys.stdout.write(" }\n")
   if result == "Failure":
     sys.exit(3)
