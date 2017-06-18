@@ -6,6 +6,9 @@ import os
 import jinja2
 from subprocess import Popen, PIPE
 import yamlordereddictloader
+import jinja2schema
+import validateChangeScript
+from termcolor import colored
 
 def main(argv):
   rollerScript = None
@@ -38,6 +41,8 @@ def main(argv):
   if operation not in ("deploy", "rollback"):
     print "Invalid Operation!\nUsage: roller.py -s <rollerScript> -o <operation>"
     sys.exit(1)
+
+  validateChangeScript.run(rollerScript)
 
   preRequisites()
 
@@ -227,12 +232,20 @@ def processChange(change, changeGroup, operation, parentChange={}, parentChangeG
     while prev!=deploy:
       prev=deploy
       deploy=jinja2.Template(deploy).render(data)
+  undefinedVariables=jinja2schema.infer(deploy)
+  if not undefinedVariables:
+    print "Variables not defined:"
+    print undefinedVariables
   if operation == "rollback" and rollback != None and not skip:
     rollback=jinja2.Template(rollback).render(data)
     prev=""
     while prev!=rollback:
       prev=rollback
       rollback=jinja2.Template(rollback).render(data)
+  undefinedVariables=jinja2schema.infer(rollback)
+  if not undefinedVariables:
+    print "Variables not defined:"
+    print undefinedVariables
 # END
 
 # For executing the change
@@ -309,7 +322,14 @@ def processChange(change, changeGroup, operation, parentChange={}, parentChangeG
   sys.stdout.write("\"script\": \"" + rollerScript + "\", ")
   sys.stdout.write("\"depth\": " + str(depth) + ", " )
   sys.stdout.write("\"operation\": \"" + operation + "\", ")
-  sys.stdout.write("\"result\": \"" + result + "\"")
+  if result == "Success":
+    sys.stdout.write("\"result\": \"" + colored(result, 'green', attrs=['bold']) + "\"")
+  elif result == "Failure":
+    sys.stdout.write("\"result\": \"" + colored(result, 'red', attrs=['bold']) + "\"")
+  elif result == "Skipped":
+    sys.stdout.write("\"result\": \"" + colored(result, 'blue', attrs=['bold']) + "\"")
+  else:
+    sys.stdout.write("\"result\": \"" + result + "\"")
 #  sys.stdout.write("\"data\":" + str(data))
   sys.stdout.write(" }\n")
   if result == "Failure":
