@@ -5,8 +5,16 @@ import yamlordereddictloader
 import jinja2schema
 from jinja2schema import model
 from termcolor import colored
+
+changeList={}
+changeGroupList={}
+
 def run(rollerScript):
+  global changeList
+  global changeGoupList
   validateChangeScript(rollerScript, "deploy")
+  changeList={}
+  changeGroupList={}
   validateChangeScript(rollerScript, "rollback")
 
 def validateChangeScript(rollerScript, operation, parentChange={}, parentChangeGroup={}, depth=0, data={}):
@@ -28,6 +36,32 @@ def validateChange(change, changeGroup, operation, parentChange={}, parentChange
 
   if "name" in changeGroup:
     groupName=changeGroup["name"]
+
+  if "name" in parentChange:
+    parentName=parentChange["name"]
+  else:
+    parentName=""
+
+  if "name" in parentChangeGroup:
+    parentGroupName=parentChangeGroup["name"]
+  else:
+    parentGroupName=""
+
+  change_id = name + "_" + groupName + "_" + parentName + "_" + parentGroupName + "_" + rollerScript
+  group_id  = groupName + "_" + parentName + "_" + parentGroupName + "_" + rollerScript
+  if change_id in changeList:
+    if depth == changeList[change_id]:
+      print "Duplicate change name " + name + " in change group " + groupName + " of change script " + rollerScript
+      sys.exit(5)
+    else:
+      print "Circular reference of change script " + rollerScript
+      sys.exit(6)
+  else:
+    changeList[change_id]=depth;
+
+  if group_id in changeGroupList:
+    print "Duplicate group name " + groupName + " in " + rollerScript
+    sys.exit(7)
 
   if "target" in change:
     target=change["target"]

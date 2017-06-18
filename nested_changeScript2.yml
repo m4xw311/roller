@@ -19,4 +19,4 @@ changeGroups:
       standardChange: "Create file"
       data:
        hostName: "localhost"
-       fileName: "test" 
+       fileName: "test"

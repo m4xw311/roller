@@ -1,5 +1,5 @@
 # Required Capabilities
-1. Detect circular includes (infinite executions)
+1. Detect circular includes (infinite executions) - done ; also detects duplication of a change name in a change group or duplication of group name in a change script
 2. Standard Change
 3. Standard Target
 4. Standard Test
