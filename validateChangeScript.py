@@ -1,4 +1,5 @@
 import sys
+import os
 import yaml
 import jinja2
 import yamlordereddictloader
@@ -18,6 +19,10 @@ def run(rollerScript):
   validateChangeScript(rollerScript, "rollback")
 
 def validateChangeScript(rollerScript, operation, parentChange={}, parentChangeGroup={}, depth=0, data={}):
+  if not os.path.isfile(rollerScript):
+    print "ChangeScript not found : " + rollerScript
+    sys.exit(9)
+
   changeScript = yaml.load(file(rollerScript,'r'), Loader=yamlordereddictloader.Loader)
   changeGroups=changeScript["changeGroups"]
 
@@ -167,11 +172,30 @@ def validateChange(change, changeGroup, operation, parentChange={}, parentChange
   else:
     includeScript=None
 
+  if "standardChange" in change:
+    standardChange=change["standardChange"]
+  elif "standardChange" in changeGroup:
+    standardChange=changeGroup["standardChange"]
+  else:
+    standardChange=None
+
+  if standardChange !=None and includeScript !=None:
+    print "Invalid change definition: standardChange and include cannot be not be used together in a change"
+    sys.exit(8) 
+
 # Nested changeScripts : including changeScripts in changeScripts
 # BEGIN
 #      Recursive processing of nested changeScripts 
   if includeScript != None:
     validateChangeScript(includeScript, operation, change, changeGroup, depth+1, data)
+    return
+# END
+
+# Standard Changes : pre-defined changes
+#BEGIN
+#     Recursive processing similar to nested changeScripts
+  if standardChange != None:
+    validateChangeScript("./standardChanges/" + standardChange + "/init.yml" , operation, change, changeGroup, depth+1, data)
     return
 # END
 

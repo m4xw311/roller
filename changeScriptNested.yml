@@ -1,0 +1,14 @@
+---
+changeGroups:
+ - name: "Group 1"
+   target: "bash"
+   changes:
+    - name: "Change 1"
+      standardChange: "createFile"
+      data:
+       fileName: "some_file0"
+
+    - name: "Change 2"
+      standardChange: "createFile"
+      data:
+       fileName: "some_file1"

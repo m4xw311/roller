@@ -176,11 +176,26 @@ def processChange(change, changeGroup, operation, parentChange={}, parentChangeG
   else:
     includeScript=None
 
+  if "standardChange" in change:
+    standardChange=change["standardChange"]
+  elif "standardChange" in changeGroup:
+    standardChange=changeGroup["standardChange"]
+  else:
+    standardChange=None 
+
 # Nested changeScripts : including changeScripts in changeScripts
 # BEGIN
 #      Recursive processing of nested changeScripts 
   if includeScript != None:
     processChangeScript(includeScript, operation, change, changeGroup, depth+1, data)
+    return
+# END
+
+# Standard Changes : pre-defined changes
+#BEGIN
+#     Recursive processing similar to nested changeScripts
+  if standardChange != None:
+    processChangeScript("./standardChanges/" + standardChange + "/init.yml" , operation, change, changeGroup, depth+1, data)
     return
 # END
 

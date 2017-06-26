@@ -1,0 +1,14 @@
+---
+changeGroups:
+ - name: "Group 1"
+   target: "bash"
+   changes:
+    - name: "Change 2"
+      deploy: "touch {{ fileName }}"
+      rollback: "rm {{ fileName }}"
+      capture:
+       fileExists: "echo -n $(ls -lrth {{ fileName }}| wc -l)"
+      deploySucessIf: "fileExists.post.out == '1'"
+      rollbackSuccessIf: "fileExists.post.out == '0'"
+      deploySkipIf: "fileExists.pre.out == '1'"
+      rollbackSkipIf: "fileExists.pre.out == '0'"
