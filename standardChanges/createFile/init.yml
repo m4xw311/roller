@@ -1,7 +1,6 @@
 ---
 changeGroups:
  - name: "Group 1"
-   target: "bash"
    changes:
     - name: "Change 2"
       deploy: "touch {{ fileName }}"
