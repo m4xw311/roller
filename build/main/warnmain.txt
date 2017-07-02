@@ -1,0 +1,51 @@
+missing module named pyimod03_importers - imported by /usr/local/lib/python2.7/dist-packages/PyInstaller/loader/rthooks/pyi_rth_pkgres.py
+missing module named _sysconfigdata_d - imported by _sysconfigdata
+missing module named 'com.sun' - imported by appdirs
+missing module named com - imported by appdirs
+missing module named win32api - imported by appdirs
+missing module named win32com.shell - imported by appdirs
+missing module named _winreg - imported by mimetypes, urllib, platform, appdirs
+missing module named winreg - imported by platform, appdirs
+missing module named 'ctypes.macholib' - imported by ctypes.util
+missing module named netbios - imported by uuid
+missing module named win32wnet - imported by uuid
+missing module named ordereddict - imported by pyparsing, yamlordereddictloader
+missing module named _thread - imported by pyparsing
+missing module named org - imported by copy
+missing module named 'importlib.machinery' - imported by pkg_resources
+missing module named 'six.moves.urllib' - imported by 'six.moves.urllib'
+missing module named six.moves.map - imported by six.moves, pkg_resources
+missing module named six.moves.filter - imported by six.moves, pkg_resources
+runtime module named six.moves - imported by pkg_resources, 'six.moves.urllib'
+missing module named _imp - imported by pkg_resources
+missing module named _scproxy - imported by urllib
+missing module named EasyDialogs - imported by getpass
+missing module named msvcrt - imported by subprocess, getpass
+missing module named SOCKS - imported by ftplib
+missing module named rourl2path - imported by urllib
+missing module named 'org.python' - imported by pickle, xml.sax
+missing module named 'java.lang' - imported by platform, xml.sax._exceptions
+missing module named _xmlplus - imported by xml
+missing module named 'Carbon.File' - imported by plistlib
+missing module named 'Carbon.Files' - imported by plistlib
+missing module named Carbon - imported by plistlib
+missing module named vms_lib - imported by platform
+missing module named java - imported by platform
+missing module named MacOS - imported by platform
+missing module named macresource - imported by MacOS
+missing module named gestalt - imported by platform
+missing module named win32pipe - imported by platform
+missing module named 'urllib.parse' - imported by jinja2._compat
+missing module named pretty - imported by jinja2.utils
+missing module named 'jinja2.debugrenderer' - imported by jinja2.debug
+missing module named __pypy__ - imported by jinja2.debug
+missing module named _subprocess - imported by subprocess
+invalid module named jinja2.asyncsupport - imported by jinja2
+missing module named riscosenviron - imported by os
+missing module named riscospath - imported by os
+missing module named riscos - imported by os
+missing module named ce - imported by os
+missing module named _emx_link - imported by os
+missing module named os2 - imported by os
+missing module named nt - imported by os, ntpath
+missing module named _yaml - imported by yaml.cyaml

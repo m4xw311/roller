@@ -7,3 +7,5 @@ sudo pip install jinja2
 sudo pip install yamlordereddictloader
 sudo pip install jinja2schema
 sudo pip install termcolor
+sudo pip install pyinstaller
+sudo apt-get install python-dev
